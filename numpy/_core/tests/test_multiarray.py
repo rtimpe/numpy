@@ -3354,15 +3354,13 @@ class TestMethods:
         with np.errstate(invalid='raise'):
             # there are two paths, depending on the number of dimensions - test
             # them both
-            with pytest.raises(FloatingPointError,
-                    match="invalid value encountered in dot"):
+            with pytest.raises(FloatingPointError):
                 np.dot(a, b)
 
             # test that fp exceptions are properly cleared
             np.dot(a, a)
 
-            with pytest.raises(FloatingPointError,
-                    match="invalid value encountered in dot"):
+            with pytest.raises(FloatingPointError):
                 np.dot(a[np.newaxis, np.newaxis, ...],
                        b[np.newaxis, ..., np.newaxis])
 

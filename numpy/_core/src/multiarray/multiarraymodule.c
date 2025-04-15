@@ -1008,6 +1008,23 @@ PyArray_MatrixProduct2(PyObject *op1, PyObject *op2, PyArrayObject* out)
         return NULL;
     }
 
+    if (PyArray_NDIM(ap1) >= 1 && PyArray_NDIM(ap1) <= 2 && PyArray_NDIM(ap2) >= 1 &&
+        PyArray_NDIM(ap2) <= 2 && typenum != NPY_TIMEDELTA) {
+        // matul has fewer constraints on the out array - perform the additional checks
+        // here
+        if (out && (!PyArray_ISCARRAY(out) || PyArray_TYPE(out) != typenum)) {
+            PyErr_SetString(PyExc_ValueError,
+                "output array is not acceptable (must have the right datatype, "
+                "number of dimensions, and be a C-Array)");
+            goto fail;
+        }
+        PyObject *matmul_res = PyObject_CallFunctionObjArgs(
+                                                            n_ops.matmul, ap1, ap2, out, NULL);
+        Py_DECREF(ap1);
+        Py_DECREF(ap2);
+        return matmul_res;
+    }
+
 #if defined(HAVE_CBLAS)
     if (PyArray_NDIM(ap1) <= 2 && PyArray_NDIM(ap2) <= 2 &&
             (NPY_DOUBLE == typenum || NPY_CDOUBLE == typenum ||
